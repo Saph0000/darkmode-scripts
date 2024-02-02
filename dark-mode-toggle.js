@@ -128,3 +128,4 @@ function colorModeToggle() {
   });
 }
 colorModeToggle();
+ console.log('colorModeToggle included');
