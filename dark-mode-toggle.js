@@ -19,7 +19,7 @@ function colorModeToggle() {
   function setImageForMode(isDark) {
     const logoImage = document.getElementById('Logo-nav'); // Ensure this is the correct ID of your logo
     if (logoImage) {
-      logoImage.src = isDark ? 'path/to/dark-mode-logo.svg' : 'path/to/light-mode-logo.svg'; // Update paths accordingly
+      logoImage.src = isDark ? 'images/Logo_JBPF.svg' : 'images/Logo_JBPF-dark.svg; // Update paths accordingly
     }
   }
 
