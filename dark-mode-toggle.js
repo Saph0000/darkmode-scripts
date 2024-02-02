@@ -11,15 +11,15 @@ function colorModeToggle() {
     if (typeof attrVal !== "string" || attrVal.trim() === "") return defaultVal;
     if (attrVal === "true" && defaultValType === "boolean") return true;
     if (attrVal === "false" && defaultValType === "boolean") return false;
-    if (!isNaN(attrVal) && defaultValType === "number") return +attrVal;
     if (isNaN(attrVal) && defaultValType === "string") return attrVal;
+    if (!isNaN(attrVal) && defaultValType === "number") return +attrVal;
     return defaultVal;
   }
 
   function setImageForMode(isDark) {
-    const logoImage = document.getElementById('Logo-nav');
+    const logoImage = document.getElementById('Logo-nav'); // Ensure this is the correct ID of your logo
     if (logoImage) {
-      logoImage.src = isDark ? 'images/Logo_JBPF-dark.svg' : 'images/Logo_JBPF.svg';
+      logoImage.src = isDark ? 'path/to/dark-mode-logo.svg' : 'path/to/light-mode-logo.svg'; // Update paths accordingly
     }
   }
 
@@ -36,9 +36,9 @@ function colorModeToggle() {
 
   let colorModeDuration = attr(0.5, scriptTag.getAttribute("duration"));
   let colorModeEase = attr("power1.out", scriptTag.getAttribute("ease"));
-  const cssVariables = scriptTag.getAttribute("tr-color-vars");
 
-  if (!cssVariables) {
+  const cssVariables = scriptTag.getAttribute("tr-color-vars");
+  if (!cssVariables.length) {
     console.warn("Value of tr-color-vars attribute not found");
     return;
   }
@@ -48,8 +48,8 @@ function colorModeToggle() {
   cssVariables.split(",").forEach(function (item) {
     let lightValue = computed.getPropertyValue(`--color--${item}`);
     let darkValue = computed.getPropertyValue(`--dark--${item}`);
-    if (lightValue) {
-      darkValue = darkValue || lightValue;
+    if (lightValue.length) {
+      if (!darkValue.length) darkValue = lightValue;
       lightColors[`--color--${item}`] = lightValue;
       darkColors[`--color--${item}`] = darkValue;
     }
@@ -75,7 +75,7 @@ function colorModeToggle() {
   }
 
   function goDark(dark, animate) {
-    setImageForMode(dark); // Update logo image based on dark mode status
+    setImageForMode(dark);
     if (dark) {
       localStorage.setItem("dark-mode", "true");
       htmlElement.classList.add("dark-mode");
@@ -87,37 +87,41 @@ function colorModeToggle() {
       setColors(lightColors, animate);
       togglePressed = "false";
     }
-    if (toggleEl) {
+    if (typeof toggleEl !== "undefined") {
       toggleEl.forEach(function (element) {
         element.setAttribute("aria-pressed", togglePressed);
       });
     }
   }
 
+  function checkPreference(e) {
+    goDark(e.matches, false);
+  }
   const colorPreference = window.matchMedia("(prefers-color-scheme: dark)");
   colorPreference.addEventListener("change", (e) => {
-    goDark(e.matches, false);
+    checkPreference(e);
   });
 
   let storagePreference = localStorage.getItem("dark-mode");
-  if (storagePreference) {
-    goDark(storagePreference === "true", false);
+  if (storagePreference !== null) {
+    storagePreference === "true" ? goDark(true, false) : goDark(false, false);
   } else {
-    goDark(colorPreference.matches, false);
+    checkPreference(colorPreference);
   }
 
-  window.addEventListener("DOMContentLoaded", () => {
+  window.addEventListener("DOMContentLoaded", (event) => {
     toggleEl = document.querySelectorAll("[tr-color-toggle]");
     toggleEl.forEach(function (element) {
       element.setAttribute("aria-label", "View Dark Mode");
       element.setAttribute("role", "button");
       element.setAttribute("aria-pressed", togglePressed);
+    });
+    toggleEl.forEach(function (element) {
       element.addEventListener("click", function () {
-        goDark(htmlElement.classList.contains("dark-mode") ? false : true, true);
+        let darkClass = htmlElement.classList.contains("dark-mode");
+        darkClass ? goDark(false, true) : goDark(true, true);
       });
     });
   });
 }
-
 colorModeToggle();
-
